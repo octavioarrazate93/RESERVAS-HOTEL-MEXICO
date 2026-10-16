@@ -117,7 +117,7 @@ html,body{background:#fff!important}.w{padding:0!important}
 .hero:hover img{transform:none}
 .hero:after{display:block;content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,rgba(142,45,226,.4),transparent 60%),linear-gradient(to top,rgba(21,13,31,.6),transparent 38%)}
 .hero .hbg{position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;filter:blur(22px) brightness(.5) saturate(1.3)}
-.hero .hfg{position:absolute;inset:0;margin:auto;height:100%;width:auto;max-width:100%;object-fit:contain;z-index:0}
+.hero .hfg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 46%;z-index:0}
 .hero:hover .hfg{transform:scale(1.03)}
 .hero .moon,.hero .bat,.hero .spider,.hero .pk,.hero .gh{position:absolute;z-index:2;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
 .hero .moon{top:10px;right:5%;font-size:clamp(30px,5vw,54px);filter:drop-shadow(0 0 14px rgba(255,214,102,.8))}
@@ -143,6 +143,9 @@ body{background:#fff!important}
 .tot{background:#fff!important;color:#222!important;border:1px solid #ccc;box-shadow:none!important}
 .prt h2{font-family:"Trebuchet MS",system-ui,sans-serif;color:#222}
 }
+.gx{position:fixed;z-index:130;pointer-events:none;line-height:1;transform:translate(-50%,-50%);animation:gup 1.5s ease-out forwards;filter:drop-shadow(0 0 8px rgba(190,140,255,.85))}
+@keyframes gup{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% - 90px)) scale(1.25) rotate(var(--r))}}
+@media print{.gx{display:none!important}}
 </style>
 </head>
 <body>
@@ -389,6 +392,14 @@ if(navigator.share){$("cSh").style.display="";$("cSh").onclick=function(){naviga
 $("mes").value=hoy.slice(0,7);$("mes").oninput=cierre;$("nvC").onclick=function(){show("C")};
 drawHabs();load();render();calc();drawH();
 
+</script>
+<script>
+(function(){var quiet=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches,n=0,last=0;
+function ghost(x,y,big){if(quiet||n>24)return;n++;var g=document.createElement("span");g.className="gx";g.textContent="👻";var s=big?26+Math.random()*10:16+Math.random()*10;g.style.cssText="left:"+x+"px;top:"+y+"px;font-size:"+s+"px;--dx:"+(Math.random()*60-30)+"px;--r:"+(Math.random()*30-15)+"deg";document.body.appendChild(g);setTimeout(function(){g.remove();n--},1500)}
+document.addEventListener("click",function(e){var x=e.clientX,y=e.clientY;if(!x&&!y&&e.target.getBoundingClientRect){var r=e.target.getBoundingClientRect();x=r.left+r.width/2;y=r.top}ghost(x,y,1)},true);
+document.addEventListener("input",function(e){var t=Date.now();if(t-last<160||!e.target.getBoundingClientRect)return;last=t;var r=e.target.getBoundingClientRect();ghost(r.left+r.width*(.3+Math.random()*.6),r.top,0)},true);
+document.addEventListener("change",function(e){if(!e.target.getBoundingClientRect)return;var r=e.target.getBoundingClientRect();ghost(Math.max(20,r.right-24),r.top,1)},true);
+})();
 </script>
 </body>
 </html>
