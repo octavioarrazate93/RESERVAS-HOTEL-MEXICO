@@ -10,8 +10,19 @@
 :root[data-theme="dark"]{--bg:#1e1613;--card:#2a201b;--tx:#f6e9df;--mut:#bfa793;--bd:#3d2f27;--ac:#ff8a5c;--ac2:#3b2418;--gr:#4cd4c3;--red:#ff7aa8;--warn:#ffc247}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;font-size:15px}
-.w{max-width:760px;margin:0 auto;padding:0 14px 30px}
-.hero{position:relative;height:210px;margin:0 -14px 14px;border-radius:0 0 30px 30px;overflow:hidden;box-shadow:0 8px 24px rgba(226,103,58,.3)}
+.w{--px:clamp(14px,3vw,40px);max-width:none;margin:0;padding:0 var(--px) 30px}
+.cols{display:block}
+.nav{display:flex;gap:10px;margin-bottom:14px}.nav button{flex:1;padding:12px;border-radius:16px;font-weight:700;font-size:16px;background:var(--card)}.nav button.on{background:linear-gradient(135deg,#ff8a4c,#e2437a);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(226,67,122,.3)}.cnt{background:var(--ac);color:#fff;border-radius:99px;padding:1px 8px;font-size:12px;margin-left:4px}.nav button.on .cnt{background:#fff;color:#e2437a}
+.bar{margin:8px 0}.bl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}.bt{height:10px;border-radius:99px;background:var(--ac2);overflow:hidden}.bt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ff8a4c,#e2437a);transition:width .6s}
+.tot{background:linear-gradient(135deg,#ff9a5c,#e2437a);color:#fff;border-radius:22px;padding:18px;margin-bottom:14px;text-align:center;box-shadow:0 8px 20px rgba(226,67,122,.3)}.tot .n{font-size:40px;font-weight:800;margin:2px 0}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.kp div{background:var(--card);border:2px solid var(--bd);border-radius:16px;padding:10px;text-align:center;font-size:12px;color:var(--mut)}.kp b{display:block;font-size:20px;color:var(--tx)}
+@media (max-width:520px){.nav{flex-wrap:wrap}.nav button{font-size:13px;padding:10px 4px;flex:1 1 45%}}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border-radius:99px;font-size:13px;padding:7px 12px;background:var(--ac2);color:var(--ac);border:none;font-weight:700}.chips button:hover{background:var(--ac);color:#fff;transform:translateY(-2px)}
+.bub{min-height:150px;background:#d9fdd3;color:#111;border-color:#b7e9b0;border-radius:18px 18px 4px 18px}
+.wbtn{display:inline-block;text-decoration:none;border-radius:12px;transition:transform .15s}.wbtn:hover{transform:translateY(-2px) scale(1.03)}
+.sec{display:none}.sec.on{display:block;animation:pop .35s both}
+@media (min-width:900px){#secN .g{grid-template-columns:1fr 1fr 1fr}}
+.hero{position:relative;height:clamp(210px,28vw,340px);margin:0 calc(var(--px)*-1) 14px;border-radius:0 0 30px 30px;overflow:hidden;box-shadow:0 8px 24px rgba(226,103,58,.3)}
 .hero img{width:100%;height:100%;object-fit:cover;transition:transform 6s ease}
 .hero:hover img{transform:scale(1.12)}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(40,15,5,.85),rgba(40,15,5,.05) 65%)}
@@ -21,7 +32,7 @@ body{margin:0;background:var(--bg);color:var(--tx);font-family:"Trebuchet MS","S
 .wave{display:inline-block;animation:wave 2s infinite;transform-origin:70% 70%}
 @keyframes wave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-10deg)}50%{transform:rotate(8deg)}}
 .sum{display:flex;gap:8px;margin-bottom:14px}
-.sum div{flex:1;border-radius:16px;padding:10px 4px;text-align:center;font-size:12px;color:#fff;transition:transform .2s;cursor:default}
+.sum div{flex:1;border-radius:16px;padding:10px 4px;text-align:center;font-size:12px;color:#fff;transition:transform .2s;cursor:pointer}
 .sum div:hover{transform:translateY(-4px) rotate(-1.5deg)}
 .sum div:nth-child(1){background:linear-gradient(135deg,#ff9a5c,#e2673a)}
 .sum div:nth-child(2){background:linear-gradient(135deg,#3bb9a8,#2f8f9e)}
@@ -84,6 +95,8 @@ button:active{transform:scale(.94)}
 <div><b id="sPend">0</b>Sin anticipo 💸</div>
 </div>
 
+<div class="nav"><button id="nvN" class="on" type="button">➕ Nueva reserva</button><button id="nvR" type="button">📋 Mis reservas <span id="nCnt" class="cnt">0</span></button><button id="nvC" type="button">💰 Cierre de mes</button><button id="nvW" type="button">💬 Chat con clientes</button></div>
+<div class="sec on" id="secN">
 <div class="card">
 <div class="row" style="margin-bottom:10px"><b id="ft" style="font-size:17px">✨ Nueva reserva</b></div>
 <div class="g">
@@ -94,7 +107,8 @@ button:active{transform:scale(.94)}
 <div><label>🌙 Noches</label><div id="nocW"></div></div>
 <div><label>🕒 Hora aprox. llegada</label><input id="hor" type="time"></div>
 <div><label>👥 Personas</label><div id="perW"></div></div>
-<div><label>💳 Forma de pago</label><select id="pag"><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Tarjeta</option></select></div>
+<div><label>💳 Forma de pago</label><select id="pag"><option>Aún no pagado</option><option>Pendiente por pagar</option><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Tarjeta</option></select></div>
+<div><label>📲 ¿Cómo reservó?</label><select id="via"><option>WhatsApp</option><option>Walk-in</option><option>Facebook</option><option>Llamada</option><option>Instagram</option><option>TikTok</option><option>Recomendado</option><option>Otro</option></select></div>
 <div class="f"><label>🛏️ Habitaciones (elige cuántas de cada una)</label><div id="habs"></div></div>
 <div><label>💲 Precio por noche (tú lo pones)</label><input id="tar" type="number" min="0" inputmode="numeric" placeholder="Ej. 1500"></div>
 <div><label>💰 Anticipo recibido</label><div class="row" style="flex-wrap:nowrap"><input id="ant" type="number" min="0" inputmode="numeric" value="0"><button type="button" class="mini" id="mit">½</button></div></div>
@@ -104,6 +118,8 @@ button:active{transform:scale(.94)}
 <div class="row" style="margin-top:12px"><button class="pri" id="gu">Guardar reserva 🎉</button><button id="ca" style="display:none">Cancelar edición</button></div>
 </div>
 
+</div>
+<div class="sec" id="secR">
 <div class="card">
 <div class="tabs" id="tabs">
 <button data-f="prox" class="on">Próximas</button><button data-f="hoy">Hoy</button><button data-f="pas">Pasadas</button><button data-f="all">Todas</button>
@@ -112,6 +128,20 @@ button:active{transform:scale(.94)}
 </div>
 
 <div id="lista"></div>
+</div>
+<div class="sec" id="secW"><div class="card">
+<b style="font-size:17px">💬 Chat con clientes</b>
+<div class="m" style="margin-bottom:10px">Elige al cliente, toca un mensaje rápido, ajústalo y se abre su chat en WhatsApp.</div>
+<div class="g">
+<div class="f"><label>👤 Cliente</label><select id="wc"></select></div>
+<div><label>Nombre</label><input id="wn"></div>
+<div><label>💬 WhatsApp</label><input id="wt" type="tel" inputmode="tel" placeholder="983..."></div>
+</div>
+<label style="margin-top:12px">⚡ Mensajes rápidos</label><div class="chips" id="wq"></div>
+<label style="margin-top:12px">✍️ Mensaje</label><textarea id="wm" class="bub" placeholder="Escribe o elige un mensaje rápido..."></textarea>
+<div class="row" style="margin-top:10px"><a class="pri wbtn" id="wgo" target="_blank" rel="noopener" href="#">📲 Abrir en WhatsApp</a><button id="wcp" type="button">📋 Copiar</button></div>
+</div></div>
+<div class="sec" id="secC"><div class="card"><label>📆 Mes del cierre</label><input id="mes" type="month"></div><div id="cierre"></div></div>
 
 <div class="card row">
 <button id="exp">📋 Copiar respaldo</button>
@@ -150,23 +180,23 @@ function calc(){
  var names=hn({habs:o});
  $("res").innerHTML="🛏️ "+(names||"Elige habitación")+"<br>🌙 <b>"+n+"</b> noche"+(n>1?"s":"")+" × "+money(t)+" por noche<br><span class='big' id='rt'></span><br>💰 Para apartar (50%): <b>"+money(n*t/2)+"</b>";
  anim($("rt"),n*t)}
-function limpiar(){edit=null;["nom","tel","not","hor","ent","sal"].forEach(function(i){$(i).value=""});$("noc").value=1;$("per").value=2;$("tar").value="";$("ant").value=0;$("ft").textContent="✨ Nueva reserva";$("gu").textContent="Guardar reserva 🎉";$("ca").style.display="none";setHabs({})}
+function limpiar(){edit=null;["nom","tel","not","hor","ent","sal"].forEach(function(i){$(i).value=""});$("noc").value=1;$("per").value=2;$("via").value="WhatsApp";$("tar").value="";$("ant").value=0;$("ft").textContent="✨ Nueva reserva";$("gu").textContent="Guardar reserva 🎉";$("ca").style.display="none";setHabs({})}
 $("ca").onclick=limpiar;
 $("mit").onclick=function(){var e=$("ent").value,s=$("sal").value;if(!e||!s||!$("tar").value){toast("Pon fechas y precio primero");return}$("ant").value=Math.round(noches(e,s)*$("tar").value/2)};
 $("gu").onclick=function(){
  var n=$("nom").value.trim();if(!n||!$("ent").value||!$("sal").value){alert("Faltan nombre, llegada y salida");return}
  if(!Object.keys(getHabs()).length){alert("Elige al menos una habitación");return}
  if(!(+$("tar").value>0)){alert("Pon el precio por noche");return}
- var r={id:edit||String(Date.now()),nom:n,tel:$("tel").value.trim(),ent:$("ent").value,sal:$("sal").value,hor:$("hor").value,per:+$("per").value||1,habs:getHabs(),tar:+$("tar").value||0,ant:+$("ant").value||0,pag:$("pag").value,not:$("not").value.trim(),est:"activa"};
+ var r={id:edit||String(Date.now()),nom:n,tel:$("tel").value.trim(),ent:$("ent").value,sal:$("sal").value,hor:$("hor").value,per:+$("per").value||1,habs:getHabs(),via:$("via").value,tar:+$("tar").value||0,ant:+$("ant").value||0,pag:$("pag").value,not:$("not").value.trim(),est:"activa"};
  if(edit){var i=D.findIndex(function(x){return x.id===edit});r.est=D[i].est;D[i]=r}else D.push(r);
- save();limpiar();render();confeti();toast("¡Reserva guardada! 🎉")};
+ var was=edit;save();limpiar();render();confeti();toast("¡Reserva guardada! 🎉");if(was)show("R")};
 function digits(t){var d=(t||"").replace(/\D/g,"");if(d.length===10)d="52"+d;return d}
 function msgConf(r){return "Hola "+r.nom+", le confirmamos su reservación en Hotel México (Calzada Veracruz 362, Chetumal): llegada "+fmt(r.ent)+(r.hor?" aprox. "+r.hor:"")+", salida "+fmt(r.sal)+", habitación "+hn(r)+" para "+r.per+" persona(s). "+noches(r.ent,r.sal)+" noche(s) a "+money(r.tar)+" por noche, total "+money(total(r))+(r.ant?", anticipo recibido "+money(r.ant)+", saldo "+money(total(r)-r.ant):". Para apartar se requiere el 50% ("+money(total(r)/2)+")")+". Depósito de $200 por llave y control, reembolsable. ¡Lo esperamos!"}
 function wa(r,txt){return"https://wa.me/"+digits(r.tel)+"?text="+encodeURIComponent(txt)}
 function cuando(r){var d=Math.round((new Date(r.ent)-new Date(hoy))/864e5);return d===0?"¡Llega hoy!":d===1?"Llega mañana":d>1?"Llega en "+d+" días":""}
 function render(){
  var q=$("q").value.toLowerCase(),act=D.filter(function(r){return r.est!=="cancelada"});
- $("sHoy").textContent=act.filter(function(r){return r.ent===hoy}).length;
+ $("nCnt").textContent=act.length;$("sHoy").textContent=act.filter(function(r){return r.ent===hoy}).length;
  var s7=new Date();s7.setDate(s7.getDate()+7);s7=iso(s7);
  $("sSem").textContent=act.filter(function(r){return r.ent>=hoy&&r.ent<=s7}).length;
  $("sPend").textContent=act.filter(function(r){return r.sal>=hoy&&r.ant<total(r)/2}).length;
@@ -181,7 +211,7 @@ function render(){
   var t=total(r),sal=t-r.ant,ok=r.ant>=t/2,cl=r.est==="cancelada"?" can":r.ent===hoy?" hoy":ok?"":" pend";
   h+='<div class="r'+cl+'" style="animation-delay:'+Math.min(k*.05,.4)+'s"><h3>'+esc(r.nom)+'</h3>'
   +'<div class="m">📅 '+fmt(r.ent)+' → '+fmt(r.sal)+(r.hor?' · 🕒 '+r.hor:'')+' · 👥 '+r.per+'</div>'
-  +'<div class="m">🛏️ '+esc(hn(r))+'</div>'
+  +'<div class="m">🛏️ '+esc(hn(r))+(r.via?' · 📲 '+esc(r.via):'')+'</div>'
   +'<div class="m">🌙 '+noches(r.ent,r.sal)+' noche/s × '+money(r.tar)+' = <b>'+money(t)+'</b></div>'
   +'<div class="m">💰 Anticipo '+money(r.ant)+' · Saldo '+money(Math.max(sal,0))+' · '+esc(r.pag)+'</div>'
   +(r.not?'<div class="m">📝 '+esc(r.not)+'</div>':'')
@@ -196,7 +226,7 @@ function render(){
  $("lista").innerHTML=h||'<div class="empty">🌴<br>Sin reservas en esta vista</div>'}
 function est(id,e){var r=D.find(function(x){return x.id===id});r.est=e;save();render();if(e==="llegó"){confeti();toast("¡Bienvenido huésped! 🧳")}}
 function del(id){if(confirm("¿Eliminar esta reserva?")){D=D.filter(function(x){return x.id!==id});save();render()}}
-function ed(id){var r=D.find(function(x){return x.id===id});edit=id;$("nom").value=r.nom;$("tel").value=r.tel;$("ent").value=r.ent;$("sal").value=r.sal;$("hor").value=r.hor;$("per").value=r.per;$("tar").value=r.tar;$("ant").value=r.ant;$("pag").value=r.pag;$("not").value=r.not;setHabs(r.habs||{});$("ft").textContent="✏️ Editando reserva";$("gu").textContent="Guardar cambios";$("ca").style.display="";calc();scrollTo({top:0,behavior:"smooth"})}
+function ed(id){var r=D.find(function(x){return x.id===id});edit=id;$("nom").value=r.nom;$("tel").value=r.tel;$("ent").value=r.ent;$("sal").value=r.sal;$("hor").value=r.hor;$("per").value=r.per;$("tar").value=r.tar;$("ant").value=r.ant;$("pag").value=r.pag;$("via").value=r.via||"WhatsApp";$("not").value=r.not;setHabs(r.habs||{});$("ft").textContent="✏️ Editando reserva";$("gu").textContent="Guardar cambios";$("ca").style.display="";calc();show("N")}
 $("tabs").onclick=function(e){var f=e.target.getAttribute("data-f");if(!f)return;filtro=f;[].forEach.call(this.children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===f)});render()};
 $("q").oninput=render;
 $("exp").onclick=function(){var t=JSON.stringify(D);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast("Respaldo copiado 📋")},function(){prompt("Copia el respaldo:",t)})}else prompt("Copia el respaldo:",t)};
@@ -205,6 +235,39 @@ $("nocW").innerHTML=stp("noc",1,1);$("perW").innerHTML=stp("per",2,1);
 $("noc").oninput=function(){var e=$("ent").value,n=+this.value;if(e&&n>0){var d=new Date(e+"T12:00");d.setDate(d.getDate()+n);$("sal").value=iso(d)}calc()};
 ["ent","sal","tar"].forEach(function(i){$(i).oninput=calc});
 $("ent").onchange=function(){if(!$("sal").value||$("sal").value<=this.value){var d=new Date(this.value+"T12:00");d.setDate(d.getDate()+(+$("noc").value||1));$("sal").value=iso(d)}calc()};
+function show(w){if(w==="C")cierre();if(w==="W")drawWc();["N","R","C","W"].forEach(function(k){$("sec"+k).classList.toggle("on",k===w);$("nv"+k).classList.toggle("on",k===w)});scrollTo({top:0,behavior:"smooth"})}
+function setF(f){filtro=f;[].forEach.call($("tabs").children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===f)});render();show("R")}
+$("nvN").onclick=function(){show("N")};$("nvR").onclick=function(){show("R")};
+["hoy","prox","prox"].forEach(function(f,i){document.querySelectorAll(".sum div")[i].onclick=function(){setF(f)}});
+function bars(o,T){var k=Object.keys(o).sort(function(a,b){return o[b]-o[a]});return k.map(function(x){var p=T?Math.round(o[x]/T*100):0;return'<div class="bar"><div class="bl"><span>'+esc(x)+'</span><b>'+money(o[x])+' · '+p+'%</b></div><div class="bt"><i style="width:'+p+'%"></i></div></div>'}).join("")||'<div class="m">Sin datos</div>'}
+function cierre(){var m=$("mes").value||hoy.slice(0,7),T=0,A=0,N=0,C=0,V={},P={},L=[];
+ D.forEach(function(r){if(r.ent.slice(0,7)!==m)return;if(r.est==="cancelada"){C++;return}L.push(r);var t=total(r);T+=t;A+=Math.min(r.ant,t);N+=noches(r.ent,r.sal);var v=r.via||"Sin dato";V[v]=(V[v]||0)+t;P[r.pag]=(P[r.pag]||0)+t});
+ var nm=new Date(m+"-15T12:00").toLocaleDateString("es-MX",{month:"long",year:"numeric"});
+ $("cierre").innerHTML='<div class="tot">💰 Ventas de '+nm+'<div class="n" id="ct">$0</div>'+L.length+' reserva'+(L.length==1?'':'s')+' · '+N+' noche'+(N==1?'':'s')+'</div>'
+ +'<div class="kp"><div><b>'+money(A)+'</b>✅ Cobrado (anticipos)</div><div><b>'+money(T-A)+'</b>⏳ Por cobrar</div><div><b>'+money(L.length?Math.round(T/L.length):0)+'</b>🧾 Promedio por reserva</div><div><b>'+C+'</b>🚫 Canceladas</div></div>'
+ +'<div class="card"><b>📲 Por cómo reservó</b>'+bars(V,T)+'</div><div class="card"><b>💳 Por forma de pago</b>'+bars(P,T)+'</div>';
+ anim($("ct"),T)}
+function hi(c){return c.n?"Hola "+c.n+", ":"Hola, "}
+var TPL=[
+["👋 Saludo",function(c){return hi(c)+"gracias por escribir a Hotel México en Chetumal 🌴 ¿Para qué fechas y cuántas personas le gustaría reservar?"}],
+["💳 Para apartar",function(c){return hi(c)+"para apartar su reservación se requiere el 50%"+(c.r?" ("+money(total(c.r)/2)+")":" del total")+". Le pido su nombre completo, hora aproximada de llegada y forma de pago."}],
+["✅ Confirmación",function(c){return c.r?msgConf(c.r):null}],
+["⏰ Recordatorio",function(c){return c.r?"Hola "+c.r.nom+", le recordamos su llegada a Hotel México el "+fmt(c.r.ent)+(c.r.hor?" a las "+c.r.hor:"")+". ¡Lo esperamos!":null}],
+["📍 Ubicación",function(c){return hi(c)+"estamos en Calzada Veracruz 362, Chetumal 📍 https://maps.app.goo.gl/KR8mw425xg527N56A"}],
+["🛎️ Servicios",function(c){return hi(c)+"nuestras habitaciones cuentan con aire acondicionado, TV, internet y agua caliente. Tenemos estacionamiento y coffee break de cortesía todas las mañanas ☕. Se pide un depósito de $200 por la llave y el control, reembolsable al entregar la habitación."}],
+["🙏 Gracias",function(c){return hi(c)+"gracias por hospedarse en Hotel México, esperamos que haya descansado mucho 🌴 ¡Lo esperamos pronto!"}]];
+function cur(){return D.find(function(x){return x.id===$("wc").value})}
+function wUp(){var d=digits($("wt").value);$("wgo").href=d?"https://wa.me/"+d+"?text="+encodeURIComponent($("wm").value):"#"}
+function drawWc(){var f=D.filter(function(r){return r.est!=="cancelada"}),p=f.filter(function(r){return r.sal>=hoy}).sort(function(a,b){return a.ent>b.ent?1:-1}),q=f.filter(function(r){return r.sal<hoy}).sort(function(a,b){return b.ent>a.ent?1:-1}),o=function(L){return L.map(function(r){return'<option value="'+r.id+'">'+esc(r.nom)+' · '+fmt(r.ent)+'</option>'}).join("")},v=$("wc").value;
+ $("wc").innerHTML='<option value="">— Otro número / cliente nuevo —</option>'+(p.length?'<optgroup label="Próximas">'+o(p)+'</optgroup>':'')+(q.length?'<optgroup label="Pasadas">'+o(q)+'</optgroup>':'');$("wc").value=v;wUp()}
+$("wc").onchange=function(){var r=cur();if(r){$("wn").value=r.nom;$("wt").value=r.tel}wUp()};
+$("wq").innerHTML=TPL.map(function(t,i){return'<button type="button" data-i="'+i+'">'+t[0]+'</button>'}).join("");
+$("wq").onclick=function(e){var i=e.target.getAttribute("data-i");if(i===null)return;var t=TPL[i][1]({n:$("wn").value.trim(),r:cur()});if(t===null){toast("Elige un cliente con reserva");return}$("wm").value=t;wUp()};
+["wn","wt","wm"].forEach(function(i){$(i).oninput=wUp});
+$("wgo").onclick=function(e){if(!digits($("wt").value)){e.preventDefault();toast("Pon el número de WhatsApp 📱")}else if(!$("wm").value.trim()){e.preventDefault();toast("Escribe o elige un mensaje")}};
+$("wcp").onclick=function(){var t=$("wm").value;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast("Mensaje copiado 📋")},function(){prompt("Copia:",t)});else prompt("Copia:",t)};
+$("nvW").onclick=function(){show("W")};
+$("mes").value=hoy.slice(0,7);$("mes").oninput=cierre;$("nvC").onclick=function(){show("C")};
 drawHabs();load();render();calc();
 </script>
 </body>
