@@ -81,6 +81,7 @@ button:active{transform:scale(.94)}
 .empty{text-align:center;color:var(--mut);padding:26px;font-size:15px}
 .conf{position:fixed;top:-30px;font-size:24px;z-index:99;pointer-events:none;animation:fall 1.8s ease-in forwards}
 @keyframes fall{to{transform:translate(var(--dx),105vh) rotate(540deg);opacity:.2}}
+.modal{position:fixed;inset:0;background:rgba(30,15,5,.55);display:none;align-items:center;justify-content:center;z-index:120;padding:16px}.modal.s{display:flex}.mb{background:var(--card);border-radius:22px;padding:18px;width:100%;max-width:400px;animation:pop .3s both}.mb h3{margin:0 0 4px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,90px);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;z-index:100;transition:transform .35s;font-weight:600}
 .toast.s{transform:translate(-50%,0)}
 </style>
@@ -95,7 +96,7 @@ button:active{transform:scale(.94)}
 <div><b id="sPend">0</b>Sin anticipo 💸</div>
 </div>
 
-<div class="nav"><button id="nvN" class="on" type="button">➕ Nueva reserva</button><button id="nvR" type="button">📋 Mis reservas <span id="nCnt" class="cnt">0</span></button><button id="nvC" type="button">💰 Cierre de mes</button><button id="nvW" type="button">💬 Chat con clientes</button></div>
+<div class="nav"><button id="nvN" class="on" type="button">➕ Nueva reserva</button><button id="nvR" type="button">📋 Mis reservas <span id="nCnt" class="cnt">0</span></button><button id="nvH" type="button">🏨 Hospedados <span id="hCnt" class="cnt">0</span></button><button id="nvC" type="button">💰 Cierre de mes</button><button id="nvW" type="button">💬 Chat con clientes</button></div>
 <div class="sec on" id="secN">
 <div class="card">
 <div class="row" style="margin-bottom:10px"><b id="ft" style="font-size:17px">✨ Nueva reserva</b></div>
@@ -129,6 +130,7 @@ button:active{transform:scale(.94)}
 
 <div id="lista"></div>
 </div>
+<div class="sec" id="secH"><div class="card"><div class="tabs" id="htabs"><button data-h="in" class="on">🏨 En el hotel</button><button data-h="out">👋 Ya salieron</button></div></div><div id="hlista"></div></div>
 <div class="sec" id="secW"><div class="card">
 <b style="font-size:17px">💬 Chat con clientes</b>
 <div class="m" style="margin-bottom:10px">Elige al cliente, toca un mensaje rápido, ajústalo y se abre su chat en WhatsApp.</div>
@@ -149,13 +151,17 @@ button:active{transform:scale(.94)}
 </div>
 <div class="m">Los datos se guardan solo en este navegador/dispositivo. Copia el respaldo de vez en cuando.</div>
 </div>
+<div class="modal" id="ci"><div class="mb"><h3 id="ciT">🛎️ Check-in</h3><div class="m" id="ciI"></div>
+<label style="margin-top:10px">💵 Pago recibido ahora</label><input id="ciA" type="number" min="0" inputmode="numeric">
+<label style="margin-top:8px">💳 Forma de pago</label><select id="ciP"><option>Efectivo</option><option>Transferencia</option><option>Depósito</option><option>Tarjeta</option><option>Pendiente por pagar</option><option>Aún no pagado</option></select>
+<div class="row" style="margin-top:12px"><button class="pri" id="ciOk" type="button">Confirmar check-in 🎉</button><button id="ciNo" type="button">Cancelar</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
 var K="reservas_hotel_v1",D=[],edit=null,filtro="prox";
 var ROOMS=[["🛏️","Sencilla"],["👑","King size"],["🛌","Doble"],["👨‍👩‍👦","Triple"],["👨‍👩‍👧‍👦","Cuádruple"]];
 function $(i){return document.getElementById(i)}
-function load(){try{D=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){D=[]}}
+function load(){try{D=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){D=[]}D.forEach(function(r){if(r.est==="llegó")r.est="hospedado"})}
 function save(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){}}
 function iso(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
 var hoy=iso(new Date());
@@ -196,14 +202,14 @@ function wa(r,txt){return"https://wa.me/"+digits(r.tel)+"?text="+encodeURICompon
 function cuando(r){var d=Math.round((new Date(r.ent)-new Date(hoy))/864e5);return d===0?"¡Llega hoy!":d===1?"Llega mañana":d>1?"Llega en "+d+" días":""}
 function render(){
  var q=$("q").value.toLowerCase(),act=D.filter(function(r){return r.est!=="cancelada"});
- $("nCnt").textContent=act.length;$("sHoy").textContent=act.filter(function(r){return r.ent===hoy}).length;
+ $("nCnt").textContent=act.length;$("sHoy").textContent=act.filter(function(r){return r.ent===hoy&&r.est==="activa"}).length;
  var s7=new Date();s7.setDate(s7.getDate()+7);s7=iso(s7);
  $("sSem").textContent=act.filter(function(r){return r.ent>=hoy&&r.ent<=s7}).length;
  $("sPend").textContent=act.filter(function(r){return r.sal>=hoy&&r.ant<total(r)/2}).length;
  var L=D.filter(function(r){
   if(q&&(r.nom+r.tel).toLowerCase().indexOf(q)<0)return false;
-  if(filtro==="prox")return r.sal>=hoy&&r.est!=="cancelada";
-  if(filtro==="hoy")return r.ent<=hoy&&r.sal>=hoy&&r.est!=="cancelada";
+  if(filtro==="prox")return r.sal>=hoy&&r.est!=="cancelada"&&r.est!=="hospedado"&&r.est!=="salió";
+  if(filtro==="hoy")return r.ent<=hoy&&r.sal>=hoy&&r.est!=="cancelada"&&r.est!=="hospedado"&&r.est!=="salió";
   if(filtro==="pas")return r.sal<hoy;
   return true}).sort(function(a,b){return filtro==="pas"?(b.ent>a.ent?1:-1):(a.ent>b.ent?1:-1)});
  var h="";
@@ -216,15 +222,15 @@ function render(){
   +'<div class="m">💰 Anticipo '+money(r.ant)+' · Saldo '+money(Math.max(sal,0))+' · '+esc(r.pag)+'</div>'
   +(r.not?'<div class="m">📝 '+esc(r.not)+'</div>':'')
   +'<div>'+(r.est==="cancelada"?'<span class="tag c">Cancelada</span>':(ok?'<span class="tag ok">✅ Apartada</span>':'<span class="tag p">⏳ Falta anticipo</span>'))
-  +(r.est==="llegó"?'<span class="tag ok">🧳 Ya llegó</span>':(r.est==="activa"&&cuando(r)?'<span class="tag">'+cuando(r)+'</span>':''))+'</div>'
+  +(r.est==="hospedado"?'<span class="tag ok">🏨 Hospedado</span>':r.est==="salió"?'<span class="tag">👋 Ya salió</span>':(r.est==="activa"&&cuando(r)?'<span class="tag">'+cuando(r)+'</span>':''))+'</div>'
   +'<div class="acts">'
   +(r.tel?'<a target="_blank" rel="noopener" href="'+wa(r,msgConf(r))+'">💬 Confirmar</a><a target="_blank" rel="noopener" href="'+wa(r,"Hola "+r.nom+", le recordamos su llegada a Hotel México el "+fmt(r.ent)+(r.hor?" a las "+r.hor:"")+". ¡Lo esperamos!")+'">⏰ Recordar</a><a href="tel:'+esc(r.tel)+'">📞</a>':'')
-  +'<button onclick="est(\''+r.id+'\',\'llegó\')">✔ Llegó</button>'
+  +'<button onclick="est(\''+r.id+'\',\'llegó\')">🛎️ Check-in</button>'
   +'<button onclick="ed(\''+r.id+'\')">✏️</button>'
   +(r.est==="cancelada"?'<button onclick="est(\''+r.id+'\',\'activa\')">Reactivar</button>':'<button onclick="est(\''+r.id+'\',\'cancelada\')">Cancelar</button>')
   +'<button onclick="del(\''+r.id+'\')">🗑</button></div></div>'});
  $("lista").innerHTML=h||'<div class="empty">🌴<br>Sin reservas en esta vista</div>'}
-function est(id,e){var r=D.find(function(x){return x.id===id});r.est=e;save();render();if(e==="llegó"){confeti();toast("¡Bienvenido huésped! 🧳")}}
+function est(id,e){var r=D.find(function(x){return x.id===id});if(e==="llegó"){abrirCI(id);return}r.est=e;if(e==="hospedado")r.ci=new Date().toISOString();if(e==="salió")r.co=new Date().toISOString();save();render();drawH();if(e==="hospedado"){confeti();toast("¡Check-in listo! 🛎️ Pasó a Hospedados")}if(e==="salió")toast("Check-out hecho 👋")}
 function del(id){if(confirm("¿Eliminar esta reserva?")){D=D.filter(function(x){return x.id!==id});save();render()}}
 function ed(id){var r=D.find(function(x){return x.id===id});edit=id;$("nom").value=r.nom;$("tel").value=r.tel;$("ent").value=r.ent;$("sal").value=r.sal;$("hor").value=r.hor;$("per").value=r.per;$("tar").value=r.tar;$("ant").value=r.ant;$("pag").value=r.pag;$("via").value=r.via||"WhatsApp";$("not").value=r.not;setHabs(r.habs||{});$("ft").textContent="✏️ Editando reserva";$("gu").textContent="Guardar cambios";$("ca").style.display="";calc();show("N")}
 $("tabs").onclick=function(e){var f=e.target.getAttribute("data-f");if(!f)return;filtro=f;[].forEach.call(this.children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===f)});render()};
@@ -235,7 +241,7 @@ $("nocW").innerHTML=stp("noc",1,1);$("perW").innerHTML=stp("per",2,1);
 $("noc").oninput=function(){var e=$("ent").value,n=+this.value;if(e&&n>0){var d=new Date(e+"T12:00");d.setDate(d.getDate()+n);$("sal").value=iso(d)}calc()};
 ["ent","sal","tar"].forEach(function(i){$(i).oninput=calc});
 $("ent").onchange=function(){if(!$("sal").value||$("sal").value<=this.value){var d=new Date(this.value+"T12:00");d.setDate(d.getDate()+(+$("noc").value||1));$("sal").value=iso(d)}calc()};
-function show(w){if(w==="C")cierre();if(w==="W")drawWc();["N","R","C","W"].forEach(function(k){$("sec"+k).classList.toggle("on",k===w);$("nv"+k).classList.toggle("on",k===w)});scrollTo({top:0,behavior:"smooth"})}
+function show(w){if(w==="C")cierre();if(w==="W")drawWc();if(w==="H")drawH();["N","R","C","W","H"].forEach(function(k){$("sec"+k).classList.toggle("on",k===w);$("nv"+k).classList.toggle("on",k===w)});scrollTo({top:0,behavior:"smooth"})}
 function setF(f){filtro=f;[].forEach.call($("tabs").children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===f)});render();show("R")}
 $("nvN").onclick=function(){show("N")};$("nvR").onclick=function(){show("R")};
 ["hoy","prox","prox"].forEach(function(f,i){document.querySelectorAll(".sum div")[i].onclick=function(){setF(f)}});
@@ -267,8 +273,33 @@ $("wq").onclick=function(e){var i=e.target.getAttribute("data-i");if(i===null)re
 $("wgo").onclick=function(e){if(!digits($("wt").value)){e.preventDefault();toast("Pon el número de WhatsApp 📱")}else if(!$("wm").value.trim()){e.preventDefault();toast("Escribe o elige un mensaje")}};
 $("wcp").onclick=function(){var t=$("wm").value;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast("Mensaje copiado 📋")},function(){prompt("Copia:",t)});else prompt("Copia:",t)};
 $("nvW").onclick=function(){show("W")};
+var ciId=null;
+function abrirCI(id){var r=D.find(function(x){return x.id===id}),s=Math.max(total(r)-r.ant,0);ciId=id;$("ciT").textContent="🛎️ Check-in · "+r.nom;$("ciI").innerHTML="Total "+money(total(r))+" · Anticipo "+money(r.ant)+" · <b>Saldo "+money(s)+"</b>";$("ciA").value=s;$("ciP").value=(r.pag&&r.pag!=="Aún no pagado"&&r.pag!=="Pendiente por pagar")?r.pag:"Efectivo";$("ci").classList.add("s")}
+$("ciNo").onclick=function(){$("ci").classList.remove("s")};
+$("ciOk").onclick=function(){var r=D.find(function(x){return x.id===ciId}),a=+$("ciA").value||0;if(!r)return;var m=$("ciP").value;r.ant+=a;r.pag=m;r.pci={a:a,m:m};r.est="hospedado";r.ci=new Date().toISOString();save();$("ci").classList.remove("s");render();drawH();confeti();toast("¡Check-in listo! 🛎️ Pasó a Hospedados")};
+var hf="in";
+function hora(s){return new Date(s).toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
+function drawH(){
+ var I=D.filter(function(r){return r.est==="hospedado"}).sort(function(a,b){return a.sal>b.sal?1:-1}),O=D.filter(function(r){return r.est==="salió"}).sort(function(a,b){return (b.co||"")>(a.co||"")?1:-1}),L=hf==="in"?I:O,h="";
+ $("hCnt").textContent=I.length;
+ L.forEach(function(r,k){var d=Math.round((new Date(r.sal)-new Date(hoy))/864e5),t=total(r),sal=Math.max(t-r.ant,0);
+  h+='<div class="r'+(hf==="in"?' hoy':'')+'" style="animation-delay:'+Math.min(k*.05,.4)+'s"><h3>'+esc(r.nom)+'</h3>'
+  +'<div class="m">🛏️ '+esc(hn(r))+' · 👥 '+r.per+'</div>'
+  +'<div class="m">📅 '+fmt(r.ent)+' → '+fmt(r.sal)+' · 🌙 '+noches(r.ent,r.sal)+' noche/s</div>'
+  +(r.ci?'<div class="m">🛎️ Check-in: '+hora(r.ci)+(r.pci&&r.pci.a?' · 💳 Pagó '+money(r.pci.a)+' ('+esc(r.pci.m)+')':'')+'</div>':'')
+  +(r.co?'<div class="m">👋 Check-out: '+hora(r.co)+'</div>':'')
+  +'<div class="m">💵 Total '+money(t)+' · Anticipo '+money(r.ant)+' · <b>Saldo '+money(sal)+'</b></div>'
+  +(hf==="in"?'<div><span class="tag'+(d<0?' c':'')+'">'+(d<0?'⚠️ Debió salir hace '+(-d)+' día(s)':d===0?'Sale hoy':d===1?'Sale mañana':'Sale en '+d+' días')+'</span>'+(sal>0?'<span class="tag p">Saldo pendiente</span>':'')+'</div>':'')
+  +'<div class="acts">'+(hf==="in"?'<button data-co="'+r.id+'">👋 Check-out</button><button data-un="'+r.id+'">↩️ Deshacer check-in</button>':'<button data-un="'+r.id+'">↩️ Deshacer check-out</button>')
+  +(r.tel?'<a target="_blank" rel="noopener" href="'+wa(r,"Hola "+r.nom+", ")+'">💬 Escribir</a>':'')+'</div></div>'});
+ $("hlista").innerHTML=h||'<div class="empty">🌴<br>'+(hf==="in"?"Aún no hay huéspedes en el hotel":"Todavía no hay check-outs")+'</div>'}
+$("hlista").onclick=function(e){var b=e.target.closest("button");if(!b)return;var c=b.getAttribute("data-co"),u=b.getAttribute("data-un");
+ if(c){var r=D.find(function(x){return x.id===c}),s=total(r)-r.ant;if(s>0&&!confirm("Aún hay saldo pendiente de "+money(s)+". ¿Hacer check-out de todos modos?"))return;est(c,"salió")}
+ if(u){var q=D.find(function(x){return x.id===u});if(q.est==="hospedado"){q.est="activa";delete q.ci}else{q.est="hospedado";delete q.co}save();render();drawH();toast("Listo ↩️")}};
+$("htabs").onclick=function(e){var f=e.target.getAttribute("data-h");if(!f)return;hf=f;[].forEach.call(this.children,function(b){b.classList.toggle("on",b.getAttribute("data-h")===f)});drawH()};
+$("nvH").onclick=function(){show("H")};
 $("mes").value=hoy.slice(0,7);$("mes").oninput=cierre;$("nvC").onclick=function(){show("C")};
-drawHabs();load();render();calc();
+drawHabs();load();render();calc();drawH();
 </script>
 </body>
 </html>
